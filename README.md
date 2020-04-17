@@ -7,6 +7,7 @@ Then use the following instructions:
 # build executables
 go build udp_server.go
 go build udp_server_monitor.go
+go build udp_client.go
 ```
 
 ### Service maintenance
@@ -33,3 +34,15 @@ export PATH=$PATH:$PWD
 # start udp_server_monitor process which will take care of udp_server
 nohup ./udp_server_monitor 2>&1 1>& log < /dev/null &
 ```
+
+### Testing procedure
+We can test our udp server with provided udp client code.
+```
+# start server as following
+udp_server -config udp_server.json
+
+# start client as following
+udp_client
+```
+The `udp_client` provides options to specify host, port and number of
+documents to be used.
