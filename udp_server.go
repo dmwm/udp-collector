@@ -16,10 +16,18 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
+	"os"
+	"runtime"
 	"strings"
+	"time"
 
 	"github.com/go-stomp/stomp"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 )
+
+// version of the code
+var version string
 
 // global pointer to Stomp connection
 var stompConn *stomp.Conn
@@ -37,7 +45,27 @@ type Configuration struct {
 	StompIterations int    `json:"stompIterations"` // Stomp iterations
 	Endpoint        string `json:"endpoint"`        // StompAMQ endpoint
 	ContentType     string `json:"contentType"`     // ContentType of UDP packet
+	LogFile         string `json:"logFile"`         // log file name
 	Verbose         bool   `json:"verbose"`         // verbose output
+}
+
+// custom rotate logger
+type rotateLogWriter struct {
+	RotateLogs *rotatelogs.RotateLogs
+}
+
+func (w rotateLogWriter) Write(data []byte) (int, error) {
+	return w.RotateLogs.Write([]byte(utcMsg(data)))
+}
+
+// helper function to use proper UTC message in a logger
+func utcMsg(data []byte) string {
+	s := string(data)
+	v, e := url.QueryUnescape(s)
+	if e == nil {
+		return v
+	}
+	return s
 }
 
 var Config Configuration
@@ -74,6 +102,12 @@ func parseConfig(configFile string) error {
 		Config.ContentType = "application/json"
 	}
 	return nil
+}
+
+func info() string {
+	goVersion := runtime.Version()
+	tstamp := time.Now().Format("2006-02-01")
+	return fmt.Sprintf("UDPServer git=%s go=%s date=%s", version, goVersion, tstamp)
 }
 
 // StompConnection returns Stomp connection
@@ -217,13 +251,36 @@ func udpServer() {
 func main() {
 	var config string
 	flag.StringVar(&config, "config", "", "configuration file")
+	var version bool
+	flag.BoolVar(&version, "version", false, "version")
 	flag.Parse()
+	if version {
+		log.Println(info())
+		os.Exit(0)
+	}
 	err := parseConfig(config)
-	if Config.Verbose {
+	// set log file or log output
+	if Config.LogFile != "" {
+		logName := Config.LogFile + "-%Y%m%d"
+		hostname, err := os.Hostname()
+		if err == nil {
+			logName = Config.LogFile + "-" + hostname + "-%Y%m%d"
+		}
+		rl, err := rotatelogs.New(logName)
+		if err == nil {
+			rotlogs := rotateLogWriter{RotateLogs: rl}
+			log.SetOutput(rotlogs)
+		}
 		log.SetFlags(log.LstdFlags | log.Lshortfile)
 	} else {
-		log.SetFlags(log.LstdFlags)
+		// log time, filename, and line number
+		if Config.Verbose {
+			log.SetFlags(log.LstdFlags | log.Lshortfile)
+		} else {
+			log.SetFlags(log.LstdFlags)
+		}
 	}
+
 	if err == nil {
 		udpServer()
 	}
