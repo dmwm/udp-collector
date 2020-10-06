@@ -27,6 +27,7 @@ var stompConn *stomp.Conn
 // Configuration stores server configuration parameters
 type Configuration struct {
 	Port            int    `json:"port"`            // server port number
+	IPAddr          string `json:"ipAddr"`          // server ip address to bind
 	MonitorPort     int    `json:"monitorPort"`     // server monitor port number
 	MonitorInterval int    `json:"monitorInterval"` // server monitor interval
 	BufSize         int    `json:"bufSize"`         // buffer size
@@ -127,7 +128,7 @@ func sendDataToStomp(data []byte) {
 func udpServer() {
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{
 		Port: Config.Port,
-		IP:   net.ParseIP("0.0.0.0"),
+		IP:   net.ParseIP(Config.IPAddr),
 	})
 	if err != nil {
 		panic(err)
