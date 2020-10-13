@@ -13,6 +13,7 @@ if [ "`hostname -s`" == "vomcs0200" ]; then
     wdir=/opt/udp
 fi
 echo "Work dir $wdir"
+export PATH=$wdir:$PATH
 
 # start actions
 start_udp_server()
@@ -42,7 +43,7 @@ start_proc_exporter()
 {
     if [ -f $wdir/process_monitor.sh ] && [ -f $wdir/process_exporter ]; then
         # start process_monitor which starts process_exporter to collect metrics about udp_server
-        nohup $wdir/process_monitor.sh "udp_server -config udp_server.json" udp_server ":9101" 5 2>&1 1>& $wdir/process_monitor.log < /dev/null &
+        nohup $wdir/process_monitor.sh "$wdir/udp_server -config $wdir/udp_server.json" udp_server ":9101" 5 2>&1 1>& $wdir/process_monitor.log < /dev/null &
         pid=`ps auxwww | egrep "process_monitor.sh" | egrep -v "grep" | awk 'BEGIN{ORS=" "} {print $2}'`
         echo "Started process_monitor.sh service... PID=${pid}"
     else
