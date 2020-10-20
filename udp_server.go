@@ -160,10 +160,15 @@ func sendDataToStomp(data []byte) {
 
 // udp server implementation
 func udpServer() {
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{
-		Port: Config.Port,
-		IP:   net.ParseIP(Config.IPAddr),
-	})
+	udpAddr := &net.UDPAddr{Port: Config.Port}
+	// if configuration provides explicitly IPAddr to bind use it here
+	if Config.IPAddr != "" {
+		udpAddr = &net.UDPAddr{
+			Port: Config.Port,
+			IP:   net.ParseIP(Config.IPAddr),
+		}
+	}
+	conn, err := net.ListenUDP("udp", udpAddr)
 	if err != nil {
 		panic(err)
 	}
