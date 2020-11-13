@@ -35,7 +35,7 @@ jobs:
       run: |
         make
         mkdir udp-collector
-        mv udp_server udp_server_monitoring udp-collector
+        mv udp_server udp_server_monitor udp-collector
         tar cvfz udp-collector.tar.gz udp-collector
 
     - name: Create Release
