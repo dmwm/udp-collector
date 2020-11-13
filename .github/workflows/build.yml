@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get github.com/google/uuid
+        go get github.com/lestrrat-go/file-rotatelogs
+        go get github.com/prometheus/procfs
+        go get github.com/shirou/gopsutil/cpu
+        go get github.com/shirou/gopsutil/load
+        go get github.com/shirou/gopsutil/mem
+        go get github.com/shirou/gopsutil/process
+
+    - name: Build
+      run: |
+        make
+        mkdir udp-collector
+        mv udp_server udp_server_monitoring udp-collector
+        tar cvfz udp-collector.tar.gz udp-collector
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload linux binary
+      id: upload-udp-collector
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./udp-collector.tar.gz
+        asset_name: udp-collector.tar.gz
+        asset_content_type: application/octet-stream
