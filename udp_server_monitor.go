@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -134,7 +133,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if verbose {
 		log.Println("received", string(data), r.Method, r.RemoteAddr)
 	}
@@ -241,7 +240,7 @@ func main() {
 	flag.Parse()
 
 	// parse config file
-	data, e := ioutil.ReadFile(config)
+	data, e := os.ReadFile(config)
 	if e != nil {
 		log.Fatalf("Unable to read config file: %v\n", config)
 		os.Exit(1)
