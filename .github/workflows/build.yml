@@ -72,6 +72,23 @@ jobs:
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/udp-server/Dockerfile
         sed -i -e "s,ENV TAG=.*,ENV TAG=${{steps.get-ref.outputs.tag}},g" Dockerfile
         docker build . --tag docker.pkg.github.com/dmwm/udp-server/udp-server
+        docker tag docker.pkg.github.com/dmwm/udp-server/udp-server registry.cern.ch/cmsweb/udp-server
+
+    - name: Login to registry.cern.ch
+      uses: docker/login-action@v1.6.0
+      with:
+        registry: registry.cern.ch
+        username: ${{ secrets.CERN_LOGIN }}
+        password: ${{ secrets.CERN_TOKEN }}
+
+    - name: Publish image to registry.cern.ch
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.CERN_LOGIN }}
+        password: ${{ secrets.CERN_TOKEN }}
+        registry: registry.cern.ch
+        repository: cmsweb/udp-server
+        tag_with_ref: true
 
     - name: Login to Registry
       uses: docker/login-action@v1.6.0
