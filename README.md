@@ -1,4 +1,7 @@
 ### CMSSW UDP collector service
+
+[![Go CI build](https://github.com/dmwm/udp-collector/actions/workflows/go-ci.yml/badge.svg)](https://github.com/dmwm/udp-collector/actions/workflows/go-ci.yml)
+
 The new CMSSW UDP collector service consist of UDP server `udp_server`
 and `udp_server_monitor` monitor application. To compile them you
 need a [Go-lang](http://golang.org/) to be installed on your system.
