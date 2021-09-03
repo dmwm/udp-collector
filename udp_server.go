@@ -221,7 +221,7 @@ func udpServer() {
 			e := string(err.Error())
 			if strings.Contains(e, "invalid character") {
 				// nothing we can do about mailformed JSON, let's dump it
-				fmt.Println(string(data))
+				log.Println(string(data))
 			} else if strings.Contains(e, "unexpected end of JSON input") {
 				// let's increse buf size to adjust to the packet size
 				bufSize = bufSize * 2
