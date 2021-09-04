@@ -115,11 +115,10 @@ func restart(config string, pw *io.PipeWriter, doStop bool) {
 		log.Println("Restart udp_server")
 	}
 	pat := fmt.Sprintf("udp_server -config %s", config)
-	status := checkProcess(pat)
-	if doStop && !status {
+	if doStop {
 		stop(pat)
 	}
-	status = checkProcess(pat)
+	status := checkProcess(pat)
 	if !status {
 		start(config, pw)
 	}
@@ -290,7 +289,7 @@ func main() {
 			// check that we receive last update
 			sec := time.Since(lastUpdate).Seconds()
 			if sec > 2*time.Duration(d).Seconds() {
-				log.Printf("No repsonse from udp_server for %v seconds, last update: %v\n", sec, lastUpdate)
+				log.Printf("No response from udp_server for %v seconds, last update: %v\n", sec, lastUpdate)
 				go restart(config, pw, true) // true refers that we'll stop existing process
 				lastUpdate = time.Now()
 			}
