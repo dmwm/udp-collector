@@ -26,6 +26,9 @@ cat > udp_server.json << EOF
     "monitorPort": 9330,
     "stompLogin": "xxx",
     "stompPassword": "yyy",
+	"SendTimeout": 10,
+	"RecvTimeout": 10,
+	"HeartBeatGracePeriod": 1.0,
     "stompURI": "zzz:port"
     "endpoint": "/abc/xyz",
     "contentType": "application/json",
@@ -37,6 +40,8 @@ export PATH=$PATH:$PWD
 # start udp_server_monitor process which will take care of udp_server
 nohup ./udp_server_monitor 2>&1 1>& log < /dev/null &
 ```
+
+Please note, the send/recvTimeout are defined in milliseconds.
 
 ### Testing procedure
 We can test our udp server with provided udp client code.
