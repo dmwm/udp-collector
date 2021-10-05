@@ -42,8 +42,8 @@ type Configuration struct {
 	StompLogin           string  `json:"stompLogin"`           // StompAQM login name
 	StompPassword        string  `json:"stompPassword"`        // StompAQM password
 	StompIterations      int     `json:"stompIterations"`      // Stomp iterations
-	SendTimeout          int     `json:"sendTimeout"`          // heartbeat send timeout in milliseconds
-	RecvTimeout          int     `json:"recvTimeout"`          // heartbeat recv timeout in milliseconds
+	SendTimeout          int     `json:"sendTimeout"`          // heartbeat send timeout in seconds
+	RecvTimeout          int     `json:"recvTimeout"`          // heartbeat recv timeout in seconds
 	HeartBeatGracePeriod float64 `json:"heartBeatGracePeriod"` // is used to calculate the read heart-beat timeout
 	Endpoint             string  `json:"endpoint"`             // StompAMQ endpoint
 	ContentType          string  `json:"contentType"`          // ContentType of UDP packet
@@ -107,10 +107,10 @@ func parseConfig(configFile string) error {
 		Config.HeartBeatGracePeriod = 1
 	}
 	if Config.SendTimeout == 0 {
-		Config.SendTimeout = 10
+		Config.SendTimeout = 600 // in seconds
 	}
 	if Config.RecvTimeout == 0 {
-		Config.RecvTimeout = 10
+		Config.RecvTimeout = 0 // in seconds
 	}
 	return nil
 }
@@ -138,7 +138,7 @@ func StompConnection() (*stomp.Conn, error) {
 	conn, err := stomp.Dial("tcp",
 		Config.StompURI,
 		stomp.ConnOpt.Login(Config.StompLogin, Config.StompPassword),
-		stomp.ConnOpt.HeartBeat(time.Duration(Config.SendTimeout)*time.Millisecond, time.Duration(Config.RecvTimeout)*time.Millisecond),
+		stomp.ConnOpt.HeartBeat(time.Duration(Config.SendTimeout)*time.Second, time.Duration(Config.RecvTimeout)*time.Second),
 		stomp.ConnOpt.HeartBeatGracePeriodMultiplier(Config.HeartBeatGracePeriod),
 	)
 	if err != nil {
