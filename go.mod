@@ -1,6 +1,6 @@
 module github.com/dmwm/udp-collector
 
-go 1.16
+go 1.17
 
 require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
@@ -14,4 +14,10 @@ require (
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+)
+
+require (
+	github.com/go-ole/go-ole v1.2.5 // indirect
+	github.com/tklauser/numcpus v0.2.3 // indirect
+	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 )
