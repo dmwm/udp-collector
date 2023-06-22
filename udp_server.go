@@ -174,6 +174,7 @@ func sendDataToStomp(data []byte) {
 
 // udp server implementation
 func udpServer() {
+	const maxFailedPacketLength = 1000 // maximum length of the failed packet to be printed
 	udpAddr := &net.UDPAddr{Port: Config.Port}
 	// if configuration provides explicitly IPAddr to bind use it here
 	if Config.IPAddr != "" {
@@ -235,8 +236,13 @@ func udpServer() {
 			log.Printf("unable to unmarshal UDP packet into JSON, error %v\n", err)
 			e := string(err.Error())
 			if strings.Contains(e, "invalid character") {
-				// nothing we can do about mailformed JSON, let's dump it
-				log.Println(string(data))
+				// truncate the malformed JSON if it exceeds the maximum length
+				// and dump it
+				failedData := string(data)
+				if len(failedData) > maxFailedPacketLength {
+					failedData = failedData[:maxFailedPacketLength] + "..."
+				}
+				log.Println(failedData)
 			} else if strings.Contains(e, "unexpected end of JSON input") {
 				// let's increse buf size to adjust to the packet size
 				bufSize = bufSize * 2
@@ -257,9 +263,32 @@ func udpServer() {
 			log.Printf("received: %s from %s\n", sdata, remote)
 		}
 
+		// check if the message has a key named "type" and rename it to "read_type"
+		if val, ok := packet["type"]; ok {
+			packet["read_type"] = val
+			delete(packet, "type")
+		}
+
 		// send data to Stomp endpoint
 		if Config.Endpoint != "" && stompConn != nil {
-			sendDataToStomp(data)
+			newData, err := json.Marshal(packet)
+			if err != nil {
+				log.Printf("unable to marshal UDP packet into JSON, error %v\n", err)
+				// truncate the failed packet if it exceeds the maximum length
+				failedPacket := fmt.Sprint(packet)
+				if len(failedPacket) > maxFailedPacketLength {
+					failedPacket = failedPacket[:maxFailedPacketLength] + "..."
+				}
+				log.Println(failedPacket) // dump the truncated message to the log
+				// clear-up our buffer
+				buffer = buffer[:0]
+				continue
+			}
+			if Config.Verbose {
+				sNewData := strings.TrimSpace(string(newData))
+				log.Printf("sent to AMQ: %s\n", sNewData)
+			}
+			sendDataToStomp(newData)
 		}
 
 		// clear-up our buffer
