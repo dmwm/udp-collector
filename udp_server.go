@@ -257,9 +257,23 @@ func udpServer() {
 			log.Printf("received: %s from %s\n", sdata, remote)
 		}
 
+		// Check if the message has a key named "type" and rename it to "read_type"
+		if val, ok := packet["type"]; ok {
+			packet["read_type"] = val
+			delete(packet, "type")
+		}
+
 		// send data to Stomp endpoint
 		if Config.Endpoint != "" && stompConn != nil {
-			sendDataToStomp(data)
+			newData, err := json.Marshal(packet)
+			if err != nil {
+				log.Printf("unable to marshal UDP packet into JSON, error %v\n", err)
+				// clear-up our buffer
+				buffer = buffer[:0]
+				continue
+			}
+			log.Printf("sent: %s \n", newData)
+			sendDataToStomp(newData)
 		}
 
 		// clear-up our buffer

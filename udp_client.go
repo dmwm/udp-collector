@@ -24,6 +24,7 @@ func record(seed, user, host string) map[string]interface{} {
 	data["server_host"] = "cmshdp-d019"
 	data["read_vector_operations"] = 17
 	data["read_single_bytes"] = 15401826
+	data["type"] = "should be read type"
 	data["app_info"] = "something"
 	data["client_domain"] = host
 	data["start_time"] = 1395960729

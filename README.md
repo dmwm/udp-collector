@@ -29,7 +29,7 @@ cat > udp_server.json << EOF
 	"SendTimeout": 10,
 	"RecvTimeout": 10,
 	"HeartBeatGracePeriod": 1.0,
-    "stompURI": "zzz:port"
+    "stompURI": "zzz:port",
     "endpoint": "/abc/xyz",
     "contentType": "application/json",
     "verbose": false
