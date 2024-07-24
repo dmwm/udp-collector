@@ -54,3 +54,15 @@ udp_client
 ```
 The `udp_client` provides options to specify host, port and number of
 documents to be used.
+
+### Production procedure
+To manage all services (including node exporter and process monitoring) you can use `udp-collector.sh` script:
+```
+$ udp-collector.sh start|stop|restart|status
+```
+
+
+Before starting it you should compile your executables for `process_exporter` (source code [here](https://github.com/dmwm/cmsweb-exporters/blob/master/process_exporter.go)) and `node_exporter` (source code [here](https://github.com/prometheus/node_exporter/tree/master)) and put them to the same directory. You can then start your `udp-collector` with the surroinding monitoring by running the following command:
+```
+$ udp-collector.sh start
+```
