@@ -7,7 +7,6 @@ package main
 //
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -36,7 +35,6 @@ type Configuration struct {
 	Port                 int     `json:"port"`                 // server port number
 	IPAddr               string  `json:"ipAddr"`               // server ip address to bind
 	MonitorPort          int     `json:"monitorPort"`          // server monitor port number
-	MonitorInterval      int     `json:"monitorInterval"`      // server monitor interval
 	BufSize              int     `json:"bufSize"`              // buffer size
 	StompURI             string  `json:"stompURI"`             // StompAMQ URI
 	StompLogin           string  `json:"stompLogin"`           // StompAQM login name
@@ -90,9 +88,6 @@ func parseConfig(configFile string) error {
 	}
 	if Config.MonitorPort == 0 {
 		Config.MonitorPort = 9330 // default port
-	}
-	if Config.MonitorInterval == 0 {
-		Config.MonitorInterval = 10 // default 10 seconds
 	}
 	if Config.BufSize == 0 {
 		Config.BufSize = 1024 // 1 KByte
@@ -213,22 +208,6 @@ func udpServer() {
 		}
 		data := buffer[:rlen]
 
-		// if we receive ping message from monitoring server
-		// we will send POST HTTP request to it with our pong reply
-		if string(data) == "ping" {
-			if Config.Verbose {
-				log.Println("received monitor", string(data))
-			}
-			// send POST request to monitoring server, but don't care about response
-			s := []byte("pong")
-			rurl := fmt.Sprintf("http://localhost:%d", Config.MonitorPort)
-			http.Post(rurl, "text/plain", bytes.NewBuffer(s))
-
-			// clean-up our buffer
-			buffer = buffer[:0]
-			continue
-		}
-
 		// try to parse the data, we are expecting JSON
 		var packet map[string]interface{}
 		err = json.Unmarshal(data, &packet)
@@ -296,6 +275,12 @@ func udpServer() {
 	}
 }
 
+// healthCheckHandler responds to health check requests
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("OK"))
+}
+
 func main() {
 	var config string
 	flag.StringVar(&config, "config", "", "configuration file")
@@ -328,6 +313,13 @@ func main() {
 			log.SetFlags(log.LstdFlags)
 		}
 	}
+
+    // Start health check HTTP server
+    go func() {
+        http.HandleFunc("/health", healthCheckHandler)
+        log.Println("Starting health check server on port %s", Config.MonitorPort)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", Config.MonitorPort), nil))
+    }()
 
 	if err == nil {
 		udpServer()
