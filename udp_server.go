@@ -314,7 +314,7 @@ func main() {
 		}
 	}
 
-    // Start health check HTTP server
+    // Start health check HTTP server for the Kubernetes liveness probe
     go func() {
         http.HandleFunc("/health", healthCheckHandler)
         log.Println("Starting health check server on port %s", Config.MonitorPort)
