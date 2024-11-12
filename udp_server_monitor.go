@@ -42,7 +42,7 @@ func udpPing(host_port string) {
 }
 
 func udpServerPID(pat string) int {
-	cmd := fmt.Sprintf("ps auxw | grep \"%s\" | grep -v grep | awk '{print $2}'", pat)
+	cmd := fmt.Sprintf("ps -o pid,args | grep \"%s\" | grep -v grep | awk '{print $1}'", pat)
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
 		log.Printf("Unable to find process pattern: %v, error: %v\n", pat, err)
