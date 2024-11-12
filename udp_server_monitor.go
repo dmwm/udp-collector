@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/prometheus/procfs"
@@ -42,16 +43,19 @@ func udpPing(host_port string) {
 }
 
 func udpServerPID(pat string) int {
-	cmd := fmt.Sprintf("ps -o pid,args | grep \"%s\" | grep -v grep | awk '{print $1}'", pat)
+	cmd := fmt.Sprintf("ps -eo pid,args | grep \"%s\" | grep -v grep | awk '{print $1}'", pat)
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
 		log.Printf("Unable to find process pattern: %v, error: %v\n", pat, err)
 		return 0
 	}
-	pid, err := strconv.Atoi(string(out))
+	outStr := strings.TrimSpace(string(out))
+	pid, err := strconv.Atoi(outStr)
 	if err != nil {
+		log.Printf("Error parsing PID from command output: %v", outStr)
 		return 0
 	}
+	log.Printf("Found PID: %d for pattern %s", pid, pat)
 	return pid
 }
 
