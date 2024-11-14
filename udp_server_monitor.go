@@ -55,85 +55,86 @@ type Exporter struct {
 }
 
 func NewExporter() *Exporter {
+	const metricPrefix = "udp_server_"
 	return &Exporter{
         memoryPercent: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "memory_percent",
+            Name: metricPrefix + "memory_percent",
             Help: "Memory usage percentage",
         }),
         memoryTotal: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "memory_total",
+            Name: metricPrefix + "memory_total",
             Help: "Total memory",
         }),
         memoryFree: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "memory_free",
+            Name: metricPrefix + "memory_free",
             Help: "Free memory",
         }),
         swapPercent: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "swap_percent",
+            Name: metricPrefix + "swap_percent",
             Help: "Swap usage percentage",
         }),
         swapTotal: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "swap_total",
+            Name: metricPrefix + "swap_total",
             Help: "Total swap",
         }),
         swapFree: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "swap_free",
+            Name: metricPrefix + "swap_free",
             Help: "Free swap",
         }),
         cpuPercent: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "cpu_percent",
+            Name: metricPrefix + "cpu_percent",
             Help: "CPU usage percentage",
         }),
         load1: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "load1",
+            Name: metricPrefix + "load1",
             Help: "1-minute load average",
         }),
         load5: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "load5",
+            Name: metricPrefix + "load5",
             Help: "5-minute load average",
         }),
         load15: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "load15",
+            Name: metricPrefix + "load15",
             Help: "15-minute load average",
         }),
         cpuTotal: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "cpu_total",
+            Name: metricPrefix + "cpu_total",
             Help: "Total CPU time",
         }),
         vSize: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "vsize",
+            Name: metricPrefix + "vsize",
             Help: "Virtual memory size",
         }),
         rss: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "rss",
+            Name: metricPrefix + "rss",
             Help: "Resident set size",
         }),
         openFDs: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "open_fds",
+            Name: metricPrefix + "open_fds",
             Help: "Number of open file descriptors",
         }),
         maxFDs: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "max_fds",
+            Name: metricPrefix + "max_fds",
             Help: "Maximum number of open file descriptors",
         }),
         maxVSize: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "max_vsize",
+            Name: metricPrefix + "max_vsize",
             Help: "Maximum virtual memory size",
         }),
         processCPU: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "process_cpu",
+            Name: metricPrefix + "process_cpu",
             Help: "Process CPU usage percentage",
         }),
         processMemory: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "process_memory",
+            Name: metricPrefix + "process_memory",
             Help: "Process memory usage percentage",
         }),
         numberThreads: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "number_threads",
+            Name: metricPrefix + "number_threads",
             Help: "Number of threads for the process",
         }),
         openFiles: prometheus.NewGauge(prometheus.GaugeOpts{
-            Name: "open_files",
+            Name: metricPrefix + "open_files",
             Help: "Number of open files for the process",
         }),
     }

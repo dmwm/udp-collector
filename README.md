@@ -9,6 +9,7 @@ Then use the following instructions:
 ```
 # build executables
 go build udp_server.go
+go build udp_server_monitor.go
 go build udp_client.go
 ```
 
@@ -28,4 +29,4 @@ The `udp_client` provides options to specify host, port and number of
 documents to be used.
 
 ### Running on a virtual machine
-You can check the history of this repository to see the old instructions if you decide to run the code on a virtual machine.
+You can check the history of this repository to see the old instructions if you decide to run the code on a virtual machine with the `udp-collector.sh` script.
