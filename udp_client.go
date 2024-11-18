@@ -1,3 +1,6 @@
+// tag to exclude this file from the main build
+// +build client
+
 package main
 
 import (
