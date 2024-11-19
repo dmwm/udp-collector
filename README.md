@@ -8,7 +8,7 @@ need a [Go-lang](http://golang.org/) to be installed on your system.
 Then use the following instructions:
 ```
 # build executable
-go build -o udp_collector
+CGO_ENABLED=0 go build -o udp_collector
 ```
 
 ### Service maintenance

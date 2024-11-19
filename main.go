@@ -8,8 +8,8 @@ import (
 	"time"
 	"runtime"
 
-	"udp-collector/udpserver"
-	"udp-collector/udpservermonitor"
+	"github.com/dmwm/udp-collector/udpserver"
+	"github.com/dmwm/udp-collector/udpservermonitor"
 )
 
 // version of the code
