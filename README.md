@@ -2,15 +2,13 @@
 
 [![Go CI build](https://github.com/dmwm/udp-collector/actions/workflows/go-ci.yml/badge.svg)](https://github.com/dmwm/udp-collector/actions/workflows/go-ci.yml)
 
-CMSSW UDP collector service consist of UDP server `udp_server`
+CMSSW UDP collector service consist of UDP server `udp_collector`
 application deployed on Kubernetes cluster. To compile it you
 need a [Go-lang](http://golang.org/) to be installed on your system.
 Then use the following instructions:
 ```
-# build executables
-go build udp_server.go
-go build udp_server_monitor.go
-go build udp_client.go
+# build executable
+go build -o udp_collector
 ```
 
 ### Service maintenance
@@ -20,7 +18,7 @@ To deploy the service please refer to [CMSKubernetes](https://github.com/dmwm/CM
 You can test the udp server with provided udp client code.
 ```
 # start server as following
-udp_server -config udp_server.json
+udp_collector -config udp_server.json
 
 # start client as following
 udp_client

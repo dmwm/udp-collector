@@ -16,16 +16,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/go-stomp/stomp"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 )
-
-// version of the code
-var version string
 
 // global pointer to Stomp connection
 var stompConn *stomp.Conn
@@ -108,12 +104,6 @@ func parseConfig(configFile string) error {
 		Config.RecvTimeout = 0 // in seconds
 	}
 	return nil
-}
-
-func info() string {
-	goVersion := runtime.Version()
-	tstamp := time.Now().Format("2006-02-01")
-	return fmt.Sprintf("UDPServer git=%s go=%s date=%s", version, goVersion, tstamp)
 }
 
 // StompConnection returns Stomp connection
@@ -291,11 +281,7 @@ func udpServer() {
 	}
 }
 
-func StartServer(config string, version bool) {
-	if version {
-		log.Println(info())
-		os.Exit(0)
-	}
+func StartServer(config string) {
 	err := parseConfig(config)
 	// set log file or log output
 	if Config.LogFile != "" {
