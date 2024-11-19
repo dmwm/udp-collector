@@ -8,9 +8,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -163,9 +160,6 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	pat := fmt.Sprintf("udp_server -config")
-	pid := udpServerPID(pat)
-
 	// Collect data
 	if memInfo, err := mem.VirtualMemory(); err == nil {
 		e.memoryPercent.Set(memInfo.UsedPercent)
@@ -188,7 +182,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	} else if verbose {
 		log.Printf("Failed to collect CPU percent: %v", err)
 	}
-
 	
 	if loadAvg, err := load.Avg(); err == nil {
 		e.load1.Set(loadAvg.Load1)
@@ -198,7 +191,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		log.Printf("Failed to collect load metrics: %v", err)
 	}
 
-	if proc, err := procfs.NewProc(pid); err == nil {
+	if proc, err := procfs.NewProc(os.Getpid()); err == nil {
 		if stat, err := proc.Stat(); err == nil {
 			e.cpuTotal.Set(float64(stat.CPUTime()))
 			e.vSize.Set(float64(stat.VirtualMemory()))
@@ -215,7 +208,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		log.Printf("Failed to collect process metrics: %v", err)
 	}
 
-	if proc, err := process.NewProcess(int32(pid)); err == nil {
+	if proc, err := process.NewProcess(int32(os.Getpid())); err == nil {
 		if cpuPercent, err := proc.CPUPercent(); err == nil {
 			e.processCPU.Set(cpuPercent)
 		}
@@ -270,22 +263,6 @@ func udpPing(hostPort string) {
 	conn.Write([]byte("ping"))
 }
 
-func udpServerPID(pat string) int {
-	cmd := fmt.Sprintf("ps -eo pid,args | grep \"%s\" | grep -v grep | awk '{print $1}'", pat)
-	out, err := exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Printf("Unable to find process pattern: %v, error: %v\n", pat, err)
-		return 0
-	}
-	outStr := strings.TrimSpace(string(out))
-	pid, err := strconv.Atoi(outStr)
-	if err != nil {
-		log.Printf("Error parsing PID from command output: %v", outStr)
-		return 0
-	}
-	return pid
-}
-
 // requestHandler helper function for our monitoring server
 // we should only received POST request from udp_server with pong data message
 func requestHandler(w http.ResponseWriter, r *http.Request) {
@@ -305,73 +282,6 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
-
-// func metricsHandler(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != "GET" {
-// 		w.WriteHeader(http.StatusMethodNotAllowed)
-// 		return
-// 	}
-// 	pat := fmt.Sprintf("udp_server -config")
-// 	pid := udpServerPID(pat)
-// 	metrics := make(map[string]interface{})
-// 	metrics["lastUpdate"] = lastUpdate.Unix()
-// 	if v, e := mem.VirtualMemory(); e == nil {
-// 		metrics["memory_percent"] = v.UsedPercent
-// 		metrics["memory_total"] = float64(v.Total)
-// 		metrics["memory_free"] = float64(v.Free)
-// 	}
-// 	if v, e := mem.SwapMemory(); e == nil {
-// 		metrics["swap_percent"] = v.UsedPercent
-// 		metrics["swap_total"] = float64(v.Total)
-// 		metrics["swap_free"] = float64(v.Free)
-// 	}
-// 	if c, e := cpu.Percent(time.Millisecond, false); e == nil {
-// 		metrics["cpu_percent"] = c[0] // one value since we didn't ask per cpu
-// 	}
-// 	if l, e := load.Avg(); e == nil {
-// 		metrics["load1"] = l.Load1
-// 		metrics["load5"] = l.Load5
-// 		metrics["load15"] = l.Load15
-// 	}
-// 	if proc, err := procfs.NewProc(pid); err == nil {
-// 		if stat, err := proc.Stat(); err == nil {
-// 			metrics["cpu_total"] = float64(stat.CPUTime())
-// 			metrics["vsize"] = float64(stat.VirtualMemory())
-// 			metrics["rss"] = float64(stat.ResidentMemory())
-// 		}
-// 		if fds, err := proc.FileDescriptorsLen(); err == nil {
-// 			metrics["open_fds"] = float64(fds)
-// 		}
-// 		if limits, err := proc.Limits(); err == nil {
-// 			metrics["max_fds"] = float64(limits.OpenFiles)
-// 			metrics["max_vsize"] = float64(limits.AddressSpace)
-// 		}
-// 	}
-// 	if proc, err := process.NewProcess(int32(pid)); err == nil {
-// 		if v, e := proc.CPUPercent(); e == nil {
-// 			metrics["proccess_cpu"] = float64(v)
-// 		}
-// 		if v, e := proc.MemoryPercent(); e == nil {
-// 			metrics["process_memory"] = float64(v)
-// 		}
-
-// 		if v, e := proc.NumThreads(); e == nil {
-// 			metrics["number_threads"] = float64(v)
-// 		}
-// 		if oFiles, e := proc.OpenFiles(); e == nil {
-// 			metrics["open_files"] = float64(len(oFiles))
-// 		}
-// 	}
-// 	data, err := json.Marshal(metrics)
-// 	log.Println("metrics", string(data), err)
-// 	if err == nil {
-// 		w.WriteHeader(http.StatusOK)
-// 		w.Write([]byte(data))
-// 		return
-// 	}
-// 	log.Println(err)
-// 	w.WriteHeader(http.StatusInternalServerError)
-// }
 
 // healthCheckHandler responds to health check requests
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
